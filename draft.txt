@@ -1,0 +1,10 @@
+download do jupyter notebook em https://colab.research.google.com/drive/1GztZv8jOpvXk5KBd7heODz-oKe6fkCwA?usp=sharing
+yt_fastchat_t5_no_openai_hf_instructor_embeddings_chroma_db_multi_doc_retriever_langchain_part2
+
+download do jupyter notebook em https://colab.research.google.com/drive/1oCrSkij1NNedV_yZzRTTv0VUjAAxSgCB?usp=sharing
+local_vs_openai_embeddings.py
+
+arquivo principal
+m.py
+
+MELHOR teria sido seguir o video e os arquivos na descricao do video: https://www.youtube.com/watch?v=9ISVjh8mdlA&list=PLMp-YeUnb9OPQZ93GOhGLm9eq7vZrk7Nx&index=5&t=194s
