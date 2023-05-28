@@ -1,9 +1,10 @@
-# Parte do codigo que cria as embeddings sem Openai: https://colab.research.google.com/drive/17eByD88swEphf-1fvNOjf_C79k0h2DgF?usp=sharing#scrollTo=wKfX4vX-5RFT
-# Parte que ao inves de usar a chain da OpenAI, usa instructor-xl: https://colab.research.google.com/drive/1oCrSkij1NNedV_yZzRTTv0VUjAAxSgCB?usp=sharing
+# Configure if CUDA should be enabled, see TROUBLESHOOTING for details on installing CUDA enabled libraries
+CUDA = False
 
 import profile
 p = profile.Profile()
 p.log("Iniciando ")
+
 import os
 from langchain.vectorstores import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -13,41 +14,25 @@ from langchain.document_loaders import TextLoader
 from langchain.document_loaders import PyPDFLoader
 from langchain.document_loaders import DirectoryLoader
 p.log("Main langchain ")
+
 from InstructorEmbedding import INSTRUCTOR
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 p.log("Langchain Embeddings ")
-#print("Carregando documentos PDF")
-#loader = DirectoryLoader('./new_papers/new_papers/', glob="./*.pdf", loader_cls=PyPDFLoader)
-#documents = loader.load()
-#print(f"Numero de documentos lidos: {len(documents)}")
-
-#print("splitting the text into chunks")
-#text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-#texts = text_splitter.split_documents(documents)
-#print(f"Total de chunks: {len(texts)}")
 
 from langchain.embeddings import HuggingFaceInstructEmbeddings
-#Linhas a seguir utiliza CUDA, normalmente suporte apenas para NVIDIA
-#print("Inicializando Embeddings com cuda")
-#instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl", model_kwargs={"device": "cuda"})
-instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-p.log("Inicializando Embeddings sem cuda ")
+if CUDA :
+	instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl", model_kwargs={"device": "cuda"})
+	p.log("Initializing embeddings with CUDA ")
+else :
+	instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+	p.log("Initializing embeddings without CUDA ")
 
 embedding = instructor_embeddings
-# Embed and store the texts
-# Supplying a persist_directory will store the embeddings on disk
 persist_directory = 'db'
-
-#vectordb = Chroma.from_documents(documents=texts, 
-#                                 embedding=embedding,
-#                                 persist_directory=persist_directory)
-#vectordb.persist()
-#vectordb = None
-
-# Now we can load the persisted database from disk, and use it as normal. 
 vectordb = Chroma(persist_directory=persist_directory, 
                   embedding_function=embedding)
 p.log("Carregando vectordb ")
+
 retriever = vectordb.as_retriever(search_kwargs={"k": 3})
 retriever.search_kwargs
 

@@ -3,8 +3,8 @@ import sys
 
 class Profile:
 	def __init__(self):
-		self.start_time = time.process_time()
+		self.start_time = time.time()
 
 	def log(self, message=""):
-		print(f"{message}{time.process_time() - self.start_time :.2f}", file=sys.stderr)
-		self.start_time = time.process_time()
+		print(f"{message}{time.time() - self.start_time :.2f}", file=sys.stderr)
+		self.start_time = time.time()
