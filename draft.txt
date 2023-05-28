@@ -1,34 +1,31 @@
+This is a study on two videos from Sam Witteveen
 download do jupyter notebook em https://colab.research.google.com/drive/1GztZv8jOpvXk5KBd7heODz-oKe6fkCwA?usp=sharing
-yt_fastchat_t5_no_openai_hf_instructor_embeddings_chroma_db_multi_doc_retriever_langchain_part2
-
 download do jupyter notebook em https://colab.research.google.com/drive/1oCrSkij1NNedV_yZzRTTv0VUjAAxSgCB?usp=sharing
-local_vs_openai_embeddings.py
 
-arquivo principal
-m.py
+Check also
+https://www.youtube.com/watch?v=9ISVjh8mdlA&list=PLMp-YeUnb9OPQZ93GOhGLm9eq7vZrk7Nx&index=5&t=194s
 
-MELHOR teria sido seguir o video e os arquivos na descricao do video: https://www.youtube.com/watch?v=9ISVjh8mdlA&list=PLMp-YeUnb9OPQZ93GOhGLm9eq7vZrk7Nx&index=5&t=194s
-
-Caso ocorra o erro
+TROUBLESHOOTING
 ERROR: Could not build wheels for hnswlib which use PEP 517 and cannot be installed directly
-pip3 install --upgrade pip wheel
+pip3 install --upgrade pip
 
-caso de erro na compilacao do wheels
+Error compiling wheels for hnswlib
 https://stackoverflow.com/questions/73969269/error-could-not-build-wheels-for-hnswlib-which-is-required-to-install-pyprojec
 
-para descobrir versao do CUDA
+Checking CUDA version
 nvidia-smi
 
-para instalar torch compativel com versao acima
+Installing torch with CUDA
 https://pytorch.org/get-started/locally/
 selecionar no topo da pagina o OS, instalador pip ou anaconda, versao do cuda compativel
 rodar o comando gerado ao se selecionar as opcoes acima
 exemplo: pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 ANTES remover os pacotes com pip3 uninstall torch torchv...
 
-Em caso de falta de memoria CUDA
+At least 8GB memory of CUDA?
 RuntimeError: CUDA error: out of memory
 https://medium.com/@snk.nitin/how-to-solve-cuda-out-of-memory-error-850bb247cfb2
 
+If there is need to downgrade protobuf:
 Downgrade the protobuf package to 3.20.x or lower
 pip install protobuf==3.20.*

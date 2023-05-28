@@ -164,4 +164,4 @@ cython_debug/
 db/index/
 .vscode
 __MACOSX
-
+.DS_STORE
