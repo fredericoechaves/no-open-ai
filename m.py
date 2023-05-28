@@ -14,20 +14,21 @@ from langchain.document_loaders import DirectoryLoader
 from InstructorEmbedding import INSTRUCTOR
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 
-print("Carregando documentos PDF")
-loader = DirectoryLoader('./new_papers/new_papers/', glob="./*.pdf", loader_cls=PyPDFLoader)
-documents = loader.load()
-print(f"Numero de documentos lidos: {len(documents)}")
+#print("Carregando documentos PDF")
+#loader = DirectoryLoader('./new_papers/new_papers/', glob="./*.pdf", loader_cls=PyPDFLoader)
+#documents = loader.load()
+#print(f"Numero de documentos lidos: {len(documents)}")
 
-print("splitting the text into chunks")
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-texts = text_splitter.split_documents(documents)
-print(f"Total de chunks: {len(texts)}")
+#print("splitting the text into chunks")
+#text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+#texts = text_splitter.split_documents(documents)
+#print(f"Total de chunks: {len(texts)}")
 
-print("Inicializando Embeddings sem cuda")
 from langchain.embeddings import HuggingFaceInstructEmbeddings
-#Linha a seguir utiliza CUDA, normalmente suporte apenas para NVIDIA
+#Linhas a seguir utiliza CUDA, normalmente suporte apenas para NVIDIA
+#print("Inicializando Embeddings com cuda")
 #instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl", model_kwargs={"device": "cuda"})
+print("Inicializando Embeddings sem cuda")
 instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
 
 embedding = instructor_embeddings
@@ -35,11 +36,12 @@ embedding = instructor_embeddings
 # Embed and store the texts
 # Supplying a persist_directory will store the embeddings on disk
 persist_directory = 'db'
-vectordb = Chroma.from_documents(documents=texts, 
-                                 embedding=embedding,
-                                 persist_directory=persist_directory)
-vectordb.persist()
-vectordb = None
+
+#vectordb = Chroma.from_documents(documents=texts, 
+#                                 embedding=embedding,
+#                                 persist_directory=persist_directory)
+#vectordb.persist()
+#vectordb = None
 
 # Now we can load the persisted database from disk, and use it as normal. 
 print("Carregando vectordb")
@@ -58,7 +60,9 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 tokenizer = AutoTokenizer.from_pretrained("lmsys/fastchat-t5-3b-v1.0")
 
+print("Carregando modelo")
 model = AutoModelForSeq2SeqLM.from_pretrained("lmsys/fastchat-t5-3b-v1.0")
+print("Modelo carregado")
 
 pipe = pipeline(
     "text2text-generation",
@@ -89,27 +93,14 @@ def wrap_text_preserve_newlines(text, width=110):
 
 def process_llm_response(llm_response):
     print(wrap_text_preserve_newlines(llm_response['result']))
-    print('\n\nSources:')
+    print('\nSources:')
     for source in llm_response["source_documents"]:
         print(source.metadata['source'])
 
-query = 'who are the authors of GPT4all technical report?'
-
-print('-------------------Instructor Embeddings------------------\n')
-llm_response = qa_chain(query)
-process_llm_response(llm_response)
-
-query = 'How was the GPT4All-J model trained?'
-
-print('-------------------Instructor Embeddings------------------\n')
-llm_response = qa_chain_instrucEmbed(query)
-process_llm_response(llm_response)
-
-
-query = '"What was the cost of training the GPT4all model?"'
-
-print('-------------------Instructor Embeddings------------------\n')
-llm_response = qa_chain_instrucEmbed(query)
-process_llm_response(llm_response)
-
-
+def answer(query, qa_chain):
+    print(query)
+    process_llm_response(qa_chain(query))
+    
+answer('who are the authors of GPT4all technical report?', qa_chain)
+answer('How was the GPT4All-J model trained?', qa_chain)
+answer('What was the cost of training the GPT4all model?', qa_chain)

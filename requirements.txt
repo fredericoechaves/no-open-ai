@@ -1,0 +1,8 @@
+langchain
+InstructorEmbedding
+torch
+tqdm
+sentence_transformers
+pypdf
+chromadb
+wheel
