@@ -1,6 +1,14 @@
 # Configure if CUDA should be enabled, see TROUBLESHOOTING for details on installing CUDA enabled libraries
 CUDA = False
 
+# Configure main model
+MODEL='lmsys/fastchat-t5-3b-v1.0'
+
+# Vector DB directory to read embeddings from
+# Model used to create the vector db embeddings
+VECTOR_DIR = 'db'
+EMBEDDINGS_MODEL = "hkunlp/instructor-xl"
+
 import profile
 p = profile.Profile()
 p.log("Iniciando ")
@@ -21,14 +29,14 @@ p.log("Langchain Embeddings ")
 
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 if CUDA :
-	instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl", model_kwargs={"device": "cuda"})
+	instructor_embeddings = HuggingFaceInstructEmbeddings(model_name=EMBEDDINGS_MODEL, model_kwargs={"device": "cuda"})
 	p.log("Initializing embeddings with CUDA ")
 else :
-	instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+	instructor_embeddings = HuggingFaceInstructEmbeddings(model_name=EMBEDDINGS_MODEL)
 	p.log("Initializing embeddings without CUDA ")
 
 embedding = instructor_embeddings
-persist_directory = 'db'
+persist_directory = VECTOR_DIR
 vectordb = Chroma(persist_directory=persist_directory, 
                   embedding_function=embedding)
 p.log("Carregando vectordb ")
@@ -43,10 +51,10 @@ import transformers
 p.log("Transformers and torch ")
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-tokenizer = AutoTokenizer.from_pretrained("lmsys/fastchat-t5-3b-v1.0")
+tokenizer = AutoTokenizer.from_pretrained(MODEL)
 p.log("Tokenizer ")
 
-model = AutoModelForSeq2SeqLM.from_pretrained("lmsys/fastchat-t5-3b-v1.0")
+model = AutoModelForSeq2SeqLM.from_pretrained(MODEL)
 p.log("Model loaded ")
 
 pipe = pipeline(
@@ -72,8 +80,10 @@ def process_llm_response(llm_response):
         print(source.metadata['source'])
 
 def answer(query, qa_chain):
-    print(f"\n\n---\n{query}")
+    print(f"\n---\n{query}")
     process_llm_response(qa_chain(query))
+
+print(f'Using {MODEL} as model, {EMBEDDINGS_MODEL} for embeddings and {VECTOR_DIR} as Vector DB DIR')
     
 answer('who are the authors of GPT4all technical report?', qa_chain)
 p.log("First answer ")
