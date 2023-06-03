@@ -11,10 +11,17 @@ VECTOR_DIR = 'db'
 EMBEDDINGS_MODEL = "hkunlp/instructor-xl"
 
 # Import configuration for tokenizers
-TOKENIZER = 'from transformers import AutoTokenizer, AutoModelForSeq2SeqLM'
+TOKENIZER_MODULE = 'transformers'
+TOKENIZER_CLASS = 'AutoTokenizer'
+
+# Import configuration for model
+MODEL_MODULE = 'transformers'
+MODEL_CLASS = 'AutoModelForSeq2SeqLM'
 
 import profile
 p = profile.Profile()
+import class_loader
+loader = class_loader.Loader()
 p.log("Iniciando ")
 
 import os
@@ -38,7 +45,6 @@ if CUDA :
 else :
 	instructor_embeddings = HuggingFaceInstructEmbeddings(model_name=EMBEDDINGS_MODEL)
 	p.log("Initializing embeddings without CUDA ")
-
 embedding = instructor_embeddings
 persist_directory = VECTOR_DIR
 vectordb = Chroma(persist_directory=persist_directory, 
@@ -65,19 +71,13 @@ p.log("Transformers and torch ")
                                               #torch_dtype=torch.float16,
                                               #low_cpu_mem_usage=True
                                               #)
-#exec(TOKENIZER)
-#from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-from transformers import AutoModelForSeq2SeqLM
-import importlib
-mod = importlib.import_module('transformers')
-tokenizer_class = getattr(mod, 'AutoTokenizer')
+tokenizer_class = loader.load(TOKENIZER_MODULE, TOKENIZER_CLASS)
 tokenizer = tokenizer_class.from_pretrained(MODEL)
 p.log("Tokenizer ")
 
-model = AutoModelForSeq2SeqLM.from_pretrained(MODEL)
+model_class = loader.load(MODEL_MODULE, MODEL_CLASS)
+model = model_class.from_pretrained(MODEL)
 p.log("Model loaded ")
-
-
 
 pipe = pipeline(
     "text2text-generation",
