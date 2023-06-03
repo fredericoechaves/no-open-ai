@@ -3,11 +3,15 @@ CUDA = False
 
 # Configure main model
 MODEL='lmsys/fastchat-t5-3b-v1.0'
+#MODEL='TheBloke/stable-vicuna-13B-HF'
 
 # Vector DB directory to read embeddings from
 # Model used to create the vector db embeddings
 VECTOR_DIR = 'db'
 EMBEDDINGS_MODEL = "hkunlp/instructor-xl"
+
+# Import configuration for tokenizers
+TOKENIZER = 'from transformers import AutoTokenizer, AutoModelForSeq2SeqLM'
 
 import profile
 p = profile.Profile()
@@ -50,12 +54,30 @@ import torch
 import transformers
 p.log("Transformers and torch ")
 
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-tokenizer = AutoTokenizer.from_pretrained(MODEL)
+
+
+#TODO nao basta mudar a string com o nome do modelo, mas a classe tambem
+#from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig, pipeline
+#tokenizer = LlamaTokenizer.from_pretrained("TheBloke/stable-vicuna-13B-HF")
+#model = LlamaForCausalLM.from_pretrained("TheBloke/stable-vicuna-13B-HF",
+                                              #load_in_8bit=True,
+                                              #device_map='auto',
+                                              #torch_dtype=torch.float16,
+                                              #low_cpu_mem_usage=True
+                                              #)
+#exec(TOKENIZER)
+#from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoModelForSeq2SeqLM
+import importlib
+mod = importlib.import_module('transformers')
+tokenizer_class = getattr(mod, 'AutoTokenizer')
+tokenizer = tokenizer_class.from_pretrained(MODEL)
 p.log("Tokenizer ")
 
 model = AutoModelForSeq2SeqLM.from_pretrained(MODEL)
 p.log("Model loaded ")
+
+
 
 pipe = pipeline(
     "text2text-generation",
