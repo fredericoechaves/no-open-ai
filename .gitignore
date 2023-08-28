@@ -166,3 +166,4 @@ db/index/
 __MACOSX
 .DS_STORE
 tags
+offload/

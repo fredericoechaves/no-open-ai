@@ -29,3 +29,6 @@ https://medium.com/@snk.nitin/how-to-solve-cuda-out-of-memory-error-850bb247cfb2
 If there is need to downgrade protobuf:
 Downgrade the protobuf package to 3.20.x or lower
 pip install protobuf==3.20.*
+
+ImportError: Using `low_cpu_mem_usage=True` or a `device_map` requires Accelerate: `pip install accelerate`
+pip install -r requirements_llama.txt

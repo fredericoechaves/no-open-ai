@@ -2,8 +2,8 @@
 CUDA = False
 
 # Configure main model
-MODEL='lmsys/fastchat-t5-3b-v1.0'
-#MODEL='TheBloke/stable-vicuna-13B-HF'
+#MODEL='lmsys/fastchat-t5-3b-v1.0'
+MODEL='TheBloke/stable-vicuna-13B-HF'
 
 # Vector DB directory to read embeddings from
 # Model used to create the vector db embeddings
@@ -63,28 +63,54 @@ p.log("Transformers and torch ")
 
 
 #TODO nao basta mudar a string com o nome do modelo, mas a classe tambem
-#from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig, pipeline
-#tokenizer = LlamaTokenizer.from_pretrained("TheBloke/stable-vicuna-13B-HF")
-#model = LlamaForCausalLM.from_pretrained("TheBloke/stable-vicuna-13B-HF",
-                                              #load_in_8bit=True,
-                                              #device_map='auto',
-                                              #torch_dtype=torch.float16,
-                                              #low_cpu_mem_usage=True
-                                              #)
-tokenizer_class = loader.load(TOKENIZER_MODULE, TOKENIZER_CLASS)
-tokenizer = tokenizer_class.from_pretrained(MODEL)
-p.log("Tokenizer ")
+from transformers import BitsAndBytesConfig
+quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
+device_map = {
+    "transformer.word_embeddings": 0,
+    "transformer.word_embeddings_layernorm": 0,
+    "lm_head": "cpu",
+    "transformer.h": 0,
+    "transformer.ln_f": 0,
+}
 
-model_class = loader.load(MODEL_MODULE, MODEL_CLASS)
-model = model_class.from_pretrained(MODEL)
+from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
+tokenizer = LlamaTokenizer.from_pretrained("TheBloke/stable-vicuna-13B-HF")
+p.log("Tokenizer ")
+model = LlamaForCausalLM.from_pretrained(
+	"TheBloke/stable-vicuna-13B-HF",
+	load_in_8bit=True,
+	torch_dtype=torch.float32,
+	device_map='auto',
+	offload_folder='offload',
+	quantization_config=quantization_config,
+)
 p.log("Model loaded ")
 
+#tokenizer_class = loader.load(TOKENIZER_MODULE, TOKENIZER_CLASS)
+#tokenizer = tokenizer_class.from_pretrained(MODEL)
+#p.log("Tokenizer ")
+
+#model_class = loader.load(MODEL_MODULE, MODEL_CLASS)
+#model = model_class.from_pretrained(MODEL)
+#p.log("Model loaded ")
+
+#pipe = pipeline(
+#    "text2text-generation",
+#    model=model, 
+#    tokenizer=tokenizer, 
+#    max_length=256
+#)
+
 pipe = pipeline(
-    "text2text-generation",
+    "text-generation",
     model=model, 
     tokenizer=tokenizer, 
-    max_length=256
+    max_length=2048,
+    temperature=0,
+    top_p=0.95,
+    repetition_penalty=1.15
 )
+
 local_llm = HuggingFacePipeline(pipeline=pipe)
 qa_chain = RetrievalQA.from_chain_type(llm=local_llm, 
                                   chain_type="stuff", 
